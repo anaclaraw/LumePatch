@@ -679,7 +679,7 @@ export default function App() {
             boxShadow: "0 8px 24px rgba(0,0,0,0.15)",
             minWidth: isMobile ? 300 : 380,
             bgcolor: "background.paper",
-            m: 2, // margin para mobile
+            m: 2,
           },
         }}
       >
@@ -1010,7 +1010,7 @@ export default function App() {
                       <Box textAlign="center" py={4}>
                         <CameraAltIcon sx={{ fontSize: 48, color: "text.secondary", mb: 2 }} />
                         <Typography variant="body2" color="text.secondary">
-                          Nenhuma detecção realizada ainda.
+                          Nenhuma detecção foi realizada ainda.
                         </Typography>
                       </Box>
                     ) : (
@@ -1101,7 +1101,7 @@ export default function App() {
                         onClick={exportSaved}
                         size={isMobile ? "small" : "medium"}
                       >
-                        Exportar
+                        Exportar detecções
                       </Button>
                     </Stack>
                   </CardContent>
