@@ -1,10 +1,10 @@
 import React, { useEffect, useState, useMemo } from "react";
-import { 
-  Box, 
-  Typography, 
-  Grid, 
-  Card, 
-  CardContent, 
+import {
+  Box,
+  Typography,
+  Grid,
+  Card,
+  CardContent,
   Paper,
   Chip,
   Alert,
@@ -24,6 +24,7 @@ import {
   DialogActions,
   LinearProgress,
   Fab,
+    useMediaQuery,
   Tooltip
 } from "@mui/material";
 import {
@@ -44,13 +45,14 @@ import {
   Sensors,
   PrecisionManufacturing
 } from "@mui/icons-material";
+import { theme } from "./theme";
 
 // Paleta de cores consistente
-const COLORS = ["#1565c0", "#42a5f5", "#81d4fa", "#29b6f6", "#4fc3f7", 
-                "#ffb300", "#ffa000", "#ff8f00", "#ef5350", "#f44336", 
-                "#66bb6a", "#4caf50", "#2e7d32"];
+const COLORS = ["#1565c0", "#42a5f5", "#81d4fa", "#29b6f6", "#4fc3f7",
+  "#ffb300", "#ffa000", "#ff8f00", "#ef5350", "#f44336",
+  "#66bb6a", "#4caf50", "#2e7d32"];
 
-                
+
 // Simulador de dados IoT
 const IoTDataSimulator = {
   getRealTimeMetrics: () => ({
@@ -78,6 +80,9 @@ export default function Dashboard() {
   const [realTimeData, setRealTimeData] = useState({});
   const [equipmentHealth, setEquipmentHealth] = useState([]);
   const [exportDialog, setExportDialog] = useState(false);
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+  const isTablet = useMediaQuery(theme.breakpoints.down('md'));
+  const isDesktop = useMediaQuery(theme.breakpoints.up('lg'));
 
   // Carregar dados do localStorage
   useEffect(() => {
@@ -87,7 +92,7 @@ export default function Dashboard() {
         const detectionData = JSON.parse(localStorage.getItem("savedDetections") || "[]");
         setStock(stockData);
         setDetections(detectionData);
-        
+
         // Atualizar dados IoT em tempo real
         setRealTimeData(IoTDataSimulator.getRealTimeMetrics());
         setEquipmentHealth(IoTDataSimulator.getEquipmentHealth());
@@ -103,20 +108,20 @@ export default function Dashboard() {
   }, [refreshKey]);
 
   // Processar dados para os gráficos
-  const { 
-    consumptionData, 
-    stockData, 
-    trendData, 
-    alerts, 
+  const {
+    consumptionData,
+    stockData,
+    trendData,
+    alerts,
     statistics,
-    recentDetections 
+    recentDetections
   } = useMemo(() => {
     const now = new Date();
     const timeRangeMs = parseInt(timeRange) * 24 * 60 * 60 * 1000;
     const startDate = new Date(now.getTime() - timeRangeMs);
 
     // Filtrar detecções pelo período selecionado
-    const filteredDetections = detections.filter(detection => 
+    const filteredDetections = detections.filter(detection =>
       new Date(detection.ts) >= startDate
     );
 
@@ -164,16 +169,16 @@ export default function Dashboard() {
         item: name,
         quantity,
         severity: quantity === 0 ? "error" : "warning",
-        message: quantity === 0 
-          ? `${name} está esgotado` 
+        message: quantity === 0
+          ? `${name} está esgotado`
           : `${name} está com estoque baixo (${quantity} unidades)`
       }));
 
     // Estatísticas gerais
     const totalStock = Object.values(stock).reduce((a, b) => a + b, 0);
     const totalConsumption = filteredDetections.length;
-    const avgDailyConsumption = trendData.length > 0 
-      ? totalConsumption / trendData.length 
+    const avgDailyConsumption = trendData.length > 0
+      ? totalConsumption / trendData.length
       : 0;
 
     const mostConsumed = consumptionData.length > 0 ? consumptionData[0] : null;
@@ -188,7 +193,7 @@ export default function Dashboard() {
       periodDetections: filteredDetections.length,
       uniqueItems: Object.keys(consumptionByItem).length,
       // NOVO: Precisão da IA baseada nas detecções
-      aiAccuracy: filteredDetections.length > 0 
+      aiAccuracy: filteredDetections.length > 0
         ? (filteredDetections.reduce((sum, det) => sum + det.score, 0) / filteredDetections.length * 100).toFixed(1) + '%'
         : 'N/A',
       systemUptime: equipmentHealth.reduce((acc, eq) => acc + eq.uptime, 0) / equipmentHealth.length
@@ -285,47 +290,47 @@ export default function Dashboard() {
   );
 
   return (
-    <Box sx={{ p: 3 }}>
+    <Box sx={{ p: 1, width:isMobile ? '100vw' : '100%'}}>
       {/* Cabeçalho e Filtros */}
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
         <Typography variant="h4" fontWeight="bold" color="primary">
           Dashboard Analítico
         </Typography>
-         <Dialog open={exportDialog} onClose={() => setExportDialog(false)} maxWidth="sm" fullWidth>
-      <DialogTitle>
-        <Download sx={{ mr: 1, verticalAlign: 'middle' }} />
-        Exportar Dados do Dashboard
-      </DialogTitle>
-      <DialogContent>
-        <Typography variant="body1" sx={{ mb: 2 }}>
-          Exportar dados completos do dashboard para análise externa?
-        </Typography>
-        <Typography variant="body2" color="text.secondary">
-          Será gerado um arquivo CSV com:
-        </Typography>
-        <List dense>
-          <ListItem>
-            <ListItemText primary="• Consumo por item" />
-          </ListItem>
-          <ListItem>
-            <ListItemText primary="• Estoque atual" />
-          </ListItem>
-          <ListItem>
-            <ListItemText primary="• Métricas de performance" />
-          </ListItem>
-        </List>
-      </DialogContent>
-      <DialogActions>
-        <Button onClick={() => setExportDialog(false)}>Cancelar</Button>
-        <Button onClick={exportToCSV} variant="contained" startIcon={<Download />}>
-          Exportar CSV
-        </Button>
-      </DialogActions>
-    </Dialog>
-        
+        <Dialog open={exportDialog} onClose={() => setExportDialog(false)} maxWidth="sm" fullWidth>
+          <DialogTitle>
+            <Download sx={{ mr: 1, verticalAlign: 'middle' }} />
+            Exportar Dados do Dashboard
+          </DialogTitle>
+          <DialogContent>
+            <Typography variant="body1" sx={{ mb: 2 }}>
+              Exportar dados completos do dashboard para análise externa?
+            </Typography>
+            <Typography variant="body2" color="text.secondary">
+              Será gerado um arquivo CSV com:
+            </Typography>
+            <List dense>
+              <ListItem>
+                <ListItemText primary="• Consumo por item" />
+              </ListItem>
+              <ListItem>
+                <ListItemText primary="• Estoque atual" />
+              </ListItem>
+              <ListItem>
+                <ListItemText primary="• Métricas de performance" />
+              </ListItem>
+            </List>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={() => setExportDialog(false)}>Cancelar</Button>
+            <Button onClick={exportToCSV} variant="contained" startIcon={<Download />}>
+              Exportar CSV
+            </Button>
+          </DialogActions>
+        </Dialog>
+
         <Stack direction="row" spacing={2} alignItems="center">
-          <Chip 
-            icon={<CalendarToday />} 
+          <Chip
+            icon={<CalendarToday />}
             label={`Últimos ${timeRange} dias`}
             variant="outlined"
           />
@@ -347,8 +352,8 @@ export default function Dashboard() {
             </IconButton>
           </Tooltip>
           <Tooltip title="Exportar Dados">
-            <Button 
-              variant="outlined" 
+            <Button
+              variant="outlined"
               startIcon={<Download />}
               onClick={() => setExportDialog(true)}
             >
@@ -358,7 +363,7 @@ export default function Dashboard() {
         </Stack>
       </Box>
 
-      
+
 
       {/* Alertas Críticos */}
       {alerts.length > 0 && (
@@ -379,9 +384,9 @@ export default function Dashboard() {
       )}
 
       {/* Cards de Estatísticas */}
-      <Grid container spacing={3} sx={{ mb: 4 }}>
-        <Grid item xs={12} sm={6} md={3}>
-          <Card sx={{ 
+      <Grid container spacing={3} sx={{ mb: 4 }} justifyContent={'center'}>
+        <Grid item xs={12} sm={6} md={3} >
+          <Card sx={{
             background: 'linear-gradient(135deg, #1565c0 0%, #42a5f5 100%)',
             color: 'white',
             height: '100%'
@@ -397,7 +402,7 @@ export default function Dashboard() {
         </Grid>
 
         <Grid item xs={12} sm={6} md={3}>
-          <Card sx={{ 
+          <Card sx={{
             background: 'linear-gradient(135deg, #2e7d32 0%, #4caf50 100%)',
             color: 'white',
             height: '100%'
@@ -413,7 +418,7 @@ export default function Dashboard() {
         </Grid>
 
         <Grid item xs={12} sm={6} md={3}>
-          <Card sx={{ 
+          <Card sx={{
             background: 'linear-gradient(135deg, #ffa000 0%, #ffb300 100%)',
             color: 'white',
             height: '100%'
@@ -429,7 +434,7 @@ export default function Dashboard() {
         </Grid>
 
         <Grid item xs={12} sm={6} md={3}>
-          <Card sx={{ 
+          <Card sx={{
             background: 'linear-gradient(135deg, #d32f2f 0%, #f44336 100%)',
             color: 'white',
             height: '100%'
@@ -443,48 +448,48 @@ export default function Dashboard() {
             </CardContent>
           </Card>
         </Grid>
-     
 
-      {/* NOVO: Status do Sistema */}
-      <Grid container spacing={2} sx={{ mb: 3 }}>
-        <Grid item xs={12}>
-          <Paper elevation={2} sx={{ p: 2, borderRadius: 2 }}>
-            <Typography variant="h6" gutterBottom sx={{ display: 'flex', alignItems: 'center' }}>
-              <Sensors sx={{ mr: 1 }} />
-              Status do Sistema IoT
-            </Typography>
-            <Grid container spacing={2}>
-              {equipmentHealth.map((equipment, index) => (
-                <Grid item xs={12} sm={6} md={3} key={index}>
-                  <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                    <Typography variant="body2" fontWeight="medium">
-                      {equipment.name}
-                    </Typography>
-                    <Chip 
-                      label={`${equipment.uptime}%`}
-                      size="small"
+
+        {/* NOVO: Status do Sistema */}
+        <Grid container spacing={2} sx={{ mb: 3,maxWidth:isMobile ? '100%' : '50%'}} >
+          <Grid item xs={12}>
+            <Paper elevation={2} sx={{ p: 2, borderRadius: 2 }}>
+              <Typography variant="h6" gutterBottom sx={{ display: 'flex', alignItems: 'center' }}>
+                <Sensors sx={{ mr: 1 }} />
+                Status do Sistema IoT
+              </Typography>
+              <Grid container spacing={2}>
+                {equipmentHealth.map((equipment, index) => (
+                  <Grid item xs={12} sm={6} md={3} key={index}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                      <Typography variant="body2" fontWeight="medium">
+                        {equipment.name}
+                      </Typography>
+                      <Chip
+                        label={`${equipment.uptime}%`}
+                        size="small"
+                        color={equipment.status === 'optimal' ? 'success' : 'warning'}
+                        variant="outlined"
+                      />
+                    </Box>
+                    <LinearProgress
+                      variant="determinate"
+                      value={equipment.uptime}
                       color={equipment.status === 'optimal' ? 'success' : 'warning'}
-                      variant="outlined"
+                      sx={{ mt: 1, height: 6, borderRadius: 3 }}
                     />
-                  </Box>
-                  <LinearProgress 
-                    variant="determinate" 
-                    value={equipment.uptime}
-                    color={equipment.status === 'optimal' ? 'success' : 'warning'}
-                    sx={{ mt: 1, height: 6, borderRadius: 3 }}
-                  />
-                </Grid>
-              ))}
-            </Grid>
-          </Paper>
+                  </Grid>
+                ))}
+              </Grid>
+            </Paper>
+          </Grid>
         </Grid>
       </Grid>
-       </Grid>
 
       {/* Gráficos Principais (MANTIDOS ORIGINAIS) */}
-      <Grid container spacing={4}>
+      <Grid container spacing={2} justifyContent={'center'}>
         {/* Consumo por Item */}
-        <Grid item xs={12} md={8}>
+        <Grid item xs={12} md={8} sx={{ minWidth:isMobile ? '100%' : '25%'}}>
           <Paper elevation={2} sx={{ p: 3, borderRadius: 3 }}>
             <Typography variant="h6" gutterBottom sx={{ display: 'flex', alignItems: 'center' }}>
               <FilterList sx={{ mr: 1 }} />
@@ -512,9 +517,9 @@ export default function Dashboard() {
           </Paper>
         </Grid>
 
-        
+
         {/* Tendência Temporal */}
-        <Grid item xs={12} sx={{minWidth:'450px'}}>
+        <Grid item xs={12} sx={{ width:isMobile ? '100%' : '30%'}}  justifyContent={'center'}>
           <Paper elevation={2} sx={{ p: 3, borderRadius: 3 }} >
             <Typography variant="h6" gutterBottom>
               Tendência de Consumo Diário
@@ -525,17 +530,17 @@ export default function Dashboard() {
                 <XAxis dataKey="date" />
                 <YAxis />
                 <Tooltip content={<CustomTooltip />} />
-                <Area 
-                  type="monotone" 
-                  dataKey="consumo" 
-                  stroke="#1565c0" 
-                  fill="rgba(21, 101, 192, 0.2)" 
+                <Area
+                  type="monotone"
+                  dataKey="consumo"
+                  stroke="#1565c0"
+                  fill="rgba(21, 101, 192, 0.2)"
                   strokeWidth={2}
                 />
-                <Line 
-                  type="monotone" 
-                  dataKey="consumo" 
-                  stroke="#1565c0" 
+                <Line
+                  type="monotone"
+                  dataKey="consumo"
+                  stroke="#1565c0"
                   strokeWidth={2}
                   dot={{ fill: '#1565c0', strokeWidth: 2 }}
                 />
@@ -545,7 +550,7 @@ export default function Dashboard() {
         </Grid>
 
         {/* Distribuição do Estoque */}
-        <Grid item xs={12} md={4} sx={{minWidth:'400px'}}>
+        <Grid item xs={12} md={4} sx={{ width:isMobile ? '100%' : '33%'}}>
           <Paper elevation={2} sx={{ p: 3, borderRadius: 3 }}>
             <Typography variant="h6" gutterBottom>
               Distribuição do Estoque
@@ -575,156 +580,154 @@ export default function Dashboard() {
         </Grid>
 
 
-        <Grid item xs={12} md={6}>
-          <Paper elevation={2} sx={{ p: 3, borderRadius: 3 }}>
-            <Typography variant="h6" gutterBottom>
-              Detecções Recentes
-            </Typography>
-            <List>
-              {recentDetections.length > 0 ? (
-                recentDetections.map((detection, index) => (
-                  <ListItem key={index} divider>
-                    <ListItemIcon>
-                      <Chip 
-                        label={`${(detection.score * 100).toFixed(1)}%`} 
-                        size="small" 
-                        color="primary"
-                      />
-                    </ListItemIcon>
-                    <ListItemText
-                      primary={
-                        <Typography fontWeight="bold" textTransform="capitalize">
-                          {detection.label}
-                        </Typography>
-                      }
-                      secondary={detection.date}
-                    />
-                  </ListItem>
-                ))
-              ) : (
-                <Typography variant="body2" color="text.secondary" sx={{ p: 2 }}>
-                  Nenhuma detecção recente
-                </Typography>
-              )}
-            </List>
-          </Paper>
-        </Grid>
-      
+       <Grid item xs={12} md={6} lg={8} sx={{ width:isMobile ? '100%' : '40%'}}>
+    <Paper elevation={2} sx={{ p: 3, borderRadius: 3 }}>
+      <Typography variant="h6" gutterBottom>
+        Detecções Recentes
+      </Typography>
+      <List>
+        {recentDetections.length > 0 ? (
+          recentDetections.map((detection, index) => (
+            <ListItem key={index} divider>
+              <ListItemIcon>
+                <Chip 
+                  label={`${(detection.score * 100).toFixed(1)}%`} 
+                  size="small" 
+                  color="primary"
+                />
+              </ListItemIcon>
+              <ListItemText
+                primary={
+                  <Typography fontWeight="bold" textTransform="capitalize">
+                    {detection.label}
+                  </Typography>
+                }
+                secondary={detection.date}
+              />
+            </ListItem>
+          ))
+        ) : (
+          <Typography variant="body2" color="text.secondary" sx={{ p: 2 }}>
+            Nenhuma detecção recente
+          </Typography>
+        )}
+      </List>
+    </Paper>
+  </Grid>
 
-      {/* Detecções Recentes e Estatísticas Detalhadas */}
-      <Grid container spacing={4} sx={{ mt: 1 }}>
+  {/* Estatísticas Detalhadas */}
+  <Grid item xs={12} md={6} lg={4}  >
+    <Paper elevation={2} sx={{ p: 3, borderRadius: 3 }}>
+      <Typography variant="h6" gutterBottom>
+        Estatísticas Detalhadas
+      </Typography>
+      <Stack spacing={2}>
+        <Box>
+          <Typography variant="body2" color="text.secondary">
+            Itens únicos consumidos
+          </Typography>
+          <Typography variant="h6" fontWeight="bold">
+            {statistics.uniqueItems} itens
+          </Typography>
+        </Box>
         
+        <Divider />
+        
+        <Box>
+          <Typography variant="body2" color="text.secondary">
+            Precisão da IA
+          </Typography>
+          <Typography variant="h6" fontWeight="bold" color="primary">
+            {statistics.aiAccuracy}
+          </Typography>
+        </Box>
+        
+        <Divider />
+        
+        <Box>
+          <Typography variant="body2" color="text.secondary">
+            Item mais consumido
+          </Typography>
+          <Typography variant="h6" fontWeight="bold">
+            {statistics.mostConsumed}
+          </Typography>
+        </Box>
+        
+        <Divider />
+        
+        <Box>
+          <Typography variant="body2" color="text.secondary">
+            Detecções no período
+          </Typography>
+          <Typography variant="h6" fontWeight="bold">
+            {statistics.periodDetections} registros
+          </Typography>
+        </Box>
+      </Stack>
+    </Paper>
+  </Grid>
 
-        <Grid item xs={12} md={6}>
-          <Paper elevation={2} sx={{ p: 3, borderRadius: 3 }}>
-            <Typography variant="h6" gutterBottom>
-              Estatísticas Detalhadas
-            </Typography>
-            <Stack spacing={2}>
-              <Box>
-                <Typography variant="body2" color="text.secondary">
-                  Itens únicos consumidos
-                </Typography>
-                <Typography variant="h6" fontWeight="bold">
-                  {statistics.uniqueItems} itens
-                </Typography>
-              </Box>
-              
-              <Divider />
-              
-              <Box>
-                <Typography variant="body2" color="text.secondary">
-                  Precisão da IA
-                </Typography>
-                <Typography variant="h6" fontWeight="bold" color="primary">
-                  {statistics.aiAccuracy}
-                </Typography>
-              </Box>
-              
-              <Divider />
-              
-              <Box>
-                <Typography variant="body2" color="text.secondary">
-                  Item mais consumido
-                </Typography>
-                <Typography variant="h6" fontWeight="bold">
-                  {statistics.mostConsumed}
-                </Typography>
-              </Box>
-              
-              <Divider />
-              
-              <Box>
-                <Typography variant="body2" color="text.secondary">
-                  Detecções no período
-                </Typography>
-                <Typography variant="h6" fontWeight="bold">
-                  {statistics.periodDetections} registros
-                </Typography>
-              </Box>
-            </Stack>
-          </Paper>
-        </Grid>
-        {/* NOVO: Cards de Monitoramento IoT */}
-      <Grid container spacing={2} sx={{ mb: 3 }}>
-        <Grid item xs={12} sm={6} md={2.4}>
-          <Card sx={{ textAlign: 'center', p: 2 }}>
-            <PrecisionManufacturing color="primary" sx={{ fontSize: 40, mb: 1 }} />
-            <Typography variant="h5" fontWeight="bold" color="primary">
-              {statistics.aiAccuracy}
-            </Typography>
-            <Typography variant="body2" color="text.secondary">
-              Precisão da IA
-            </Typography>
-          </Card>
-        </Grid>
-        <Grid item xs={12} sm={6} md={2.4}>
-          <Card sx={{ textAlign: 'center', p: 2 }}>
-            <Speed color="secondary" sx={{ fontSize: 40, mb: 1 }} />
-            <Typography variant="h5" fontWeight="bold" color="secondary">
-              {realTimeData.processingSpeed?.toFixed(0) || 0}ms
-            </Typography>
-            <Typography variant="body2" color="text.secondary">
-              Velocidade
-            </Typography>
-          </Card>
-        </Grid>
-        <Grid item xs={12} sm={6} md={2.4}>
-          <Card sx={{ textAlign: 'center', p: 2 }}>
-            <Sensors color="success" sx={{ fontSize: 40, mb: 1 }} />
-            <Typography variant="h5" fontWeight="bold" color="success.main">
-              {realTimeData.temperature?.toFixed(1) || 0}°C
-            </Typography>
-            <Typography variant="body2" color="text.secondary">
-              Temperatura
-            </Typography>
-          </Card>
-        </Grid>
-        <Grid item xs={12} sm={6} md={2.4}>
-          <Card sx={{ textAlign: 'center', p: 2 }}>
-            <Sensors color="info" sx={{ fontSize: 40, mb: 1 }} />
-            <Typography variant="h5" fontWeight="bold" color="info.main">
-              {realTimeData.humidity?.toFixed(1) || 0}%
-            </Typography>
-            <Typography variant="body2" color="text.secondary">
-              Umidade
-            </Typography>
-          </Card>
-        </Grid>
-        <Grid item xs={12} sm={6} md={2.4}>
-          <Card sx={{ textAlign: 'center', p: 2 }}>
-            <Speed color="warning" sx={{ fontSize: 40, mb: 1 }} />
-            <Typography variant="h5" fontWeight="bold" color="warning.main">
-              {realTimeData.networkLatency?.toFixed(0) || 0}ms
-            </Typography>
-            <Typography variant="body2" color="text.secondary">
-              Latência
-            </Typography>
-          </Card>
+  {/* Cards de Monitoramento IoT - Agora em linha única */}
+  <Grid item xs={12} sx={{ width:isTablet ? '100%' : '30%'}}>
+    <Grid container spacing={3} >
+      <Grid item xs={12} sm={6} md={2.4}>
+        <Card sx={{ textAlign: 'center', p: 2 }}>
+          <PrecisionManufacturing color="primary" sx={{ fontSize: 40, mb: 1 }} />
+          <Typography variant="h5" fontWeight="bold" color="primary">
+            {statistics.aiAccuracy}
+          </Typography>
+          <Typography variant="body2" color="text.secondary">
+            Precisão da IA
+          </Typography>
+        </Card>
+      </Grid>
+      <Grid item xs={12} sm={6} md={2.4}>
+        <Card sx={{ textAlign: 'center', p: 2 }}>
+          <Speed color="secondary" sx={{ fontSize: 40, mb: 1 }} />
+          <Typography variant="h5" fontWeight="bold" color="secondary">
+            {realTimeData.processingSpeed?.toFixed(0) || 0}ms
+          </Typography>
+          <Typography variant="body2" color="text.secondary">
+            Velocidade
+          </Typography>
+        </Card>
+      </Grid>
+      <Grid item xs={12} sm={6} md={2.4}>
+        <Card sx={{ textAlign: 'center', p: 2 }}>
+          <Sensors color="success" sx={{ fontSize: 40, mb: 1 }} />
+          <Typography variant="h5" fontWeight="bold" color="success.main">
+            {realTimeData.temperature?.toFixed(1) || 0}°C
+          </Typography>
+          <Typography variant="body2" color="text.secondary">
+            Temperatura
+          </Typography>
+        </Card>
+      </Grid>
+      <Grid item xs={12} sm={6} md={2.4}>
+        <Card sx={{ textAlign: 'center', p: 2 }}>
+          <Sensors color="info" sx={{ fontSize: 40, mb: 1 }} />
+          <Typography variant="h5" fontWeight="bold" color="info.main">
+            {realTimeData.humidity?.toFixed(1) || 0}%
+          </Typography>
+          <Typography variant="body2" color="text.secondary">
+            Umidade
+          </Typography>
+        </Card>
+      </Grid>
+      <Grid item xs={12} sm={6} md={2.4}>
+        <Card sx={{ textAlign: 'center', p: 2 }}>
+          <Speed color="warning" sx={{ fontSize: 40, mb: 1 }} />
+          <Typography variant="h5" fontWeight="bold" color="warning.main">
+            {realTimeData.networkLatency?.toFixed(0) || 0}ms
+          </Typography>
+          <Typography variant="body2" color="text.secondary">
+            Latência
+          </Typography>
+        </Card>
+            </Grid>
+          </Grid>
         </Grid>
       </Grid>
-      </Grid>
-</Grid>
       {/* Botão Flutuante para Exportação Rápida */}
       <Tooltip title="Exportar Dados">
         <Fab
