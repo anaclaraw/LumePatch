@@ -667,7 +667,7 @@ export default function Dashboard() {
     </Paper>
   </Grid>
 
-  {/* Cards de Monitoramento IoT - Agora em linha única */}
+  {/* Cards de Monitoramento IoT - responsivo */}
   <Grid item xs={12} sx={{ width:isTablet ? '100%' : '30%'}}>
     <Grid container spacing={3} >
       <Grid item xs={12} sm={6} md={2.4}>

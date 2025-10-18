@@ -1001,7 +1001,7 @@ export default function App() {
               <Grid item xs={12} lg={4} >
                 <Card sx={{minWidth:'45vw'}}>
                   <CardContent>
-                    <Box display="flex" alignItems="center" mb={2}>
+                    <Box display="flex" alignItems="center" mb={2} gap={2}>
                       <HistoryIcon color="primary" sx={{ mr: 0 }} />
                       <Typography variant="h6">Histórico de Detecções</Typography>
                     </Box>
@@ -1030,7 +1030,7 @@ export default function App() {
                                 </IconButton>
                               </Tooltip>
                             }
-                            sx={{ py: 1 }}
+                            sx={{ py: 1, gap:2}}
                           >
                             <ListItemAvatar>
                               <Avatar
