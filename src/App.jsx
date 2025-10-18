@@ -1,4 +1,3 @@
-// App.jsx (ou .tsx) - versão com entrada/saída e controle de lote
 import React, { useRef, useEffect, useState } from "react";
 import * as tmImage from "@teachablemachine/image";
 import {
@@ -36,7 +35,6 @@ import {
   Snackbar,
   Alert,
   Fab,
-  Input,
   useMediaQuery,
   RadioGroup,
   FormControlLabel,
@@ -60,7 +58,6 @@ import {
   Output as OutputIcon,
 } from "@mui/icons-material";
 
-// (Assumo que você já tem Dashboard component)
 import Dashboard from "./Dashboard";
 
 const TEACHABLE_MODEL_URL = "/teachable/";
@@ -132,7 +129,6 @@ function totalQty(lots = []) {
   return lots.reduce((s, l) => s + (Number(l.qty) || 0), 0);
 }
 
-// UTIL: consume FEFO from lots, returns {success: boolean, consumedLots: [{lotId, qtyConsumed}], updatedLots}
 function consumeFEFO(lots = [], desiredQty) {
   let remaining = desiredQty;
   const sorted = [...lots].sort((a, b) => new Date(a.ts) - new Date(b.ts)); // oldest first
@@ -154,7 +150,7 @@ function consumeFEFO(lots = [], desiredQty) {
   return { success: true, consumedLots: consumed, updatedLots: cleaned };
 }
 
-// MODELS - por enquanto usando o mesmo modelo, mas preparado para diferentes modelos
+
 const MODEL_CONFIG = {
   entrada: {
     name: "Modelo Entrada",
@@ -188,11 +184,9 @@ export default function App() {
     }
   });
 
-  // NOVO STATE: Tipo de operação (entrada/saída)
   const [operationType, setOperationType] = useState("saida"); // 'entrada' ou 'saida'
   const [confirmQty, setConfirmQty] = useState("");
 
-  // NOVO STATE: Campos específicos para entrada (criação de lote)
   const [entradaLotId, setEntradaLotId] = useState("");
   const [entradaExpiryDate, setEntradaExpiryDate] = useState("");
 
@@ -213,7 +207,7 @@ export default function App() {
           return {};
         }
       }
-      // default initial (create one lot per item)
+
       const init = {};
       TARGET_LABELS.forEach((label) => {
         init[label] = [{ lotId: `initial_${label}`, qty: 20, ts: new Date().toISOString() }];
@@ -244,7 +238,6 @@ export default function App() {
     }
   });
 
-  // correction dialog
   const [correctionOpen, setCorrectionOpen] = useState(false);
   const [correctionIndex, setCorrectionIndex] = useState(null);
   const [correctionLabel, setCorrectionLabel] = useState("");
@@ -256,7 +249,7 @@ export default function App() {
   const isDesktop = useMediaQuery(theme.breakpoints.up('lg'));
 
   // Login state
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(true);
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -265,7 +258,7 @@ export default function App() {
     start();
     return () => stop();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [operationType]); // Recarrega quando o tipo de operação muda
+  }, [operationType]); 
 
   async function start() {
     try {
@@ -307,7 +300,6 @@ export default function App() {
   }
 
   async function loadModel() {
-    // NOVA LÓGICA: Carrega o modelo baseado no tipo de operação
     const modelConfig = MODEL_CONFIG[operationType];
     modelRef.current = await tmImage.load(
       modelConfig.url + "model.json",
@@ -361,7 +353,6 @@ export default function App() {
     return cap.toDataURL("image/png");
   }
 
-  // NOVA FUNÇÃO: Confirmar entrada de estoque (cria novo lote)
   function confirmEntrada() {
     if (!pending || pending.length === 0) return;
 
@@ -405,7 +396,7 @@ export default function App() {
 
       updatedLots[normalized] = [newLot, ...updatedLots[normalized]];
 
-      // Registrar na história
+      // Registrar na historia
       const savedEntry = {
         label: det.label,
         score: det.score,
@@ -466,7 +457,7 @@ export default function App() {
             image: det.image,
             ts: new Date().toISOString(),
             quantity: qty,
-            consumedLots, // informação de quais lotes foram consumidos
+            consumedLots, 
             operation: "saida",
             user: username || "unknown",
           };
@@ -488,7 +479,6 @@ export default function App() {
     closeModal();
   }
 
-  // FUNÇÃO UNIFICADA: Decide qual função chamar baseado no tipo de operação
   function confirmPending() {
     if (operationType === 'entrada') {
       confirmEntrada();
@@ -534,9 +524,6 @@ export default function App() {
     setStockModalOpen(false);
   }
 
-  // Resto das funções permanecem iguais...
-  // [exportSaved, handleZipUpload, handleLogin, doLogout, openCorrection, applyCorrection]
-  // Export saved to file
   function exportSaved() {
     const blob = new Blob([JSON.stringify(saved, null, 2)], { type: "application/json" });
     const url = URL.createObjectURL(blob);
@@ -576,7 +563,6 @@ export default function App() {
     reader.readAsDataURL(file);
   }
 
-  // Login handling
   const handleLogin = () => {
     if (username) {
       setIsLoggedIn(true);
@@ -592,7 +578,6 @@ export default function App() {
     setSnackbar({ open: true, message: "Logout realizado", type: "info" });
   }
 
-  // Correction flow: open correction for an existing saved detection
   function openCorrection(i) {
     const entry = saved[i];
     if (!entry) return;
@@ -611,8 +596,7 @@ export default function App() {
     const newLabel = correctionLabel;
     const updatedSaved = [...saved];
 
-    // If label changed or qty increased, we need to adjust stock/backstock accordingly.
-    // Simple approach:
+    
     // - If newQty < oldQty: we should add back (reponha) the difference into a new "correction" lot with ts=now.
     // - If newQty > oldQty: try to consume FEFO from stock for the difference; if not enough, notify user.
     // - If label changed: we treat it as if previous detection removed old item; we'll revert oldQty to old label, and then apply newQty to new label.
@@ -670,7 +654,7 @@ export default function App() {
     setCorrectionOpen(false);
     setCorrectionIndex(null);
   }
-  // ... (o restante do código permanece igual até a parte da UI)
+
   // UI helpers: totals, low stock etc.
   const allLabels = TARGET_LABELS;
   const totals = {};
@@ -1337,7 +1321,7 @@ export default function App() {
       {/* Hidden canvas */}
       <canvas ref={captureCanvasRef} style={{ display: "none" }} />
 
-      {/* NOVO MODAL: Modal confirmação unificado para entrada/saída */}
+      {/* Modal confirmação unificado para entrada/saída */}
       <Dialog
         open={modalOpen}
         onClose={cancelPending}
