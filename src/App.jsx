@@ -64,7 +64,7 @@ const TEACHABLE_MODEL_URL = "/teachable/";
 const TARGET_LABELS = [
   "soro_fisiológico_0,9%",
   "mascara",
-  "caixa_de_máscara_10_unidades",
+  "caixa_de_mascara_10_unidades",
   "luva_latex_m_10_unidades",
   "seringa",
   "luvas",
@@ -380,7 +380,7 @@ export default function App() {
       // Gerar ID do lote se não fornecido
       const lotId = entradaLotId && entradaLotId.trim() !== ""
         ? entradaLotId.trim()
-        : `entrada_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+        : `entrada_${Math.floor(Math.random() * 900000000) + 100000000}`;
 
       const ts = new Date().toISOString();
 
